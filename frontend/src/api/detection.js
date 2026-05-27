@@ -73,3 +73,15 @@ export const getCameraStatus = () => {
     method: 'get'
   })
 }
+
+export const detectRealtimeFrame = (data) => {
+  return request({
+    url: '/video-detection/realtime-frame',
+    method: 'post',
+    data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    timeout: 10000
+  })
+}

@@ -7,6 +7,7 @@ from app.api.detection import router as detection_router
 from app.api.auth import router as auth_router
 from app.api.history import router as history_router
 from app.api.camera import router as camera_router
+from app.api.video_detection import router as video_detection_router
 from app.utils.file_utils import ensure_directories
 
 ensure_directories()
@@ -34,6 +35,7 @@ app.include_router(auth_router, prefix="/api")
 app.include_router(detection_router, prefix="/api")
 app.include_router(history_router, prefix="/api")
 app.include_router(camera_router, prefix="/api")
+app.include_router(video_detection_router, prefix="/api")
 
 
 @app.get("/")

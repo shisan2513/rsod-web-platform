@@ -14,6 +14,7 @@
         @click="handleTabClick(tab.key)"
       >
         <input
+          v-if="!tab.noInput"
           type="file"
           :accept="tab.accept"
           :multiple="tab.multiple"
@@ -32,8 +33,13 @@
       <CameraDetection />
     </div>
 
+    <!-- Video detection -->
+    <div v-if="activeTab === 'video'" class="video-section">
+      <VideoDetection />
+    </div>
+
     <!-- Batch detection strip -->
-    <div v-if="batchFiles.length > 0 && activeTab !== 'camera'" class="batch-strip">
+    <div v-if="batchFiles.length > 0 && activeTab !== 'camera' && activeTab !== 'video'" class="batch-strip">
       <div v-if="batchProgress.total > 0" class="batch-progress">
         <span class="batch-progress-text">检测中 {{ batchResults.length }} / {{ batchProgress.total }}</span>
         <div class="batch-progress-bar"><div class="batch-progress-fill" :style="{ width: (batchResults.length / batchProgress.total * 100) + '%' }"></div></div>
@@ -55,7 +61,7 @@
     </div>
 
     <!-- Main content — detection area dominates -->
-    <div v-if="activeTab !== 'camera'" class="main-content">
+    <div v-if="activeTab !== 'camera' && activeTab !== 'video'" class="main-content">
       <!-- Left: Hero detection area -->
       <div class="hero-panel">
         <div class="hero-header">
@@ -234,6 +240,7 @@ import {
 import { detectSingleImage, detectBatchImages, getDetectionDetail } from "../api/detection";
 import { useModelStore } from "../stores/model";
 import CameraDetection from "../components/CameraDetection.vue";
+import VideoDetection from "../components/VideoDetection.vue";
 
 const modelStore = useModelStore();
 const route = useRoute();
@@ -254,22 +261,19 @@ const functionTabs = [
   { key: "batch", name: "Batch", icon: Plus, accept: "image/*", multiple: true },
   { key: "folder", name: "Folder", icon: Folder, accept: "image/*", multiple: true },
   { key: "camera", name: "Camera", icon: VideoCamera, accept: "", multiple: false, noInput: true },
-  { key: "video", name: "Video", icon: Monitor, accept: "video/*", multiple: false },
+  { key: "video", name: "Video", icon: Monitor, accept: "", multiple: false, noInput: true },
 ];
 
 const fileInputs = ref([]);
 
 const handleTabClick = (key) => {
   activeTab.value = key;
-  const tab = functionTabs.find(t => t.key === key);
-  if (tab?.noInput) return;
-  const input = document.querySelector(`.function-tab[data-key="${key}"] .file-input`);
-  if (input) input.click();
 };
 
 const handleFileChange = async (event, tabKey) => {
   event.stopPropagation();
   event.preventDefault();
+  activeTab.value = tabKey;
   const files = event.target.files;
   if (!files || files.length === 0) return;
 
@@ -1075,6 +1079,11 @@ async function loadRecord() {
 
 /* ---- Camera section ---- */
 .camera-section {
+  padding: 8px 0;
+}
+
+/* ---- Video section ---- */
+.video-section {
   padding: 8px 0;
 }
 </style>

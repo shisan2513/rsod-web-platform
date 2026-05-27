@@ -119,3 +119,47 @@ class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserRead
+
+
+# --- Account Management Schemas ---
+
+class UpdateProfileRequest(BaseModel):
+    nickname: Optional[str] = None
+    email: Optional[str] = None
+
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+
+class UserStats(BaseModel):
+    total_detections: int
+    total_objects: int
+    success_rate: float
+    active_days: int
+    this_month: int
+    avg_objects_per_detection: float
+
+
+class ProfileResponse(BaseModel):
+    code: int = 200
+    message: str
+    user: UserRead
+    stats: UserStats
+
+
+# --- Video Detection Schemas ---
+
+class RealtimeDetectionResult(BaseModel):
+    boxes: List[DetectionBox]
+    total_objects: int
+    detection_time: float
+    image_width: int
+    image_height: int
+
+
+class RealtimeDetectionResponse(BaseModel):
+    success: bool
+    message: str
+    data: Optional[RealtimeDetectionResult] = None

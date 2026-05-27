@@ -6,7 +6,7 @@ from ultralytics import YOLO
 import cv2
 
 from app.config import settings
-from app.models.schemas import DetectionBox, DetectionResult
+from app.models.schemas import DetectionBox, DetectionResult, RealtimeDetectionResult
 
 
 class DetectionService:
@@ -82,6 +82,53 @@ class DetectionService:
             detection_time=round(detection_time, 3),
             model_name=model_name,
             created_at=datetime.now()
+        )
+
+
+    def detect_frame_realtime(self, image, model_name: str = "yolo11n",
+                              confidence_threshold: float = None,
+                              iou_threshold: float = None):
+        start_time = time.time()
+
+        if confidence_threshold is None:
+            confidence_threshold = settings.CONFIDENCE_THRESHOLD
+        if iou_threshold is None:
+            iou_threshold = settings.IOU_THRESHOLD
+
+        results = self.model.predict(
+            source=image,
+            conf=confidence_threshold,
+            iou=iou_threshold,
+            save=False
+        )
+
+        boxes = []
+        for result in results:
+            for box in result.boxes:
+                x1, y1, x2, y2 = box.xyxy[0].tolist()
+                confidence = float(box.conf[0])
+                class_id = int(box.cls[0])
+                class_name = self.get_class_name(class_id)
+
+                boxes.append(DetectionBox(
+                    x1=round(x1, 2),
+                    y1=round(y1, 2),
+                    x2=round(x2, 2),
+                    y2=round(y2, 2),
+                    confidence=round(confidence, 4),
+                    class_id=class_id,
+                    class_name=class_name,
+                    chinese_name=self.YOLO_CLASS_ZH.get(class_id, f"类别{class_id}")
+                ))
+
+        detection_time = time.time() - start_time
+
+        return RealtimeDetectionResult(
+            total_objects=len(boxes),
+            boxes=boxes,
+            detection_time=round(detection_time, 4),
+            image_width=image.shape[1] if len(image.shape) >= 2 else 0,
+            image_height=image.shape[0] if len(image.shape) >= 2 else 0
         )
 
 
