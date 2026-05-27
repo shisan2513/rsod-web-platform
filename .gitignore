@@ -13,6 +13,7 @@ __pycache__/
 data/
 uploads/
 results/
+static/
 
 # Docker 数据
 storage/
@@ -28,3 +29,12 @@ models/*.pt
 
 # 日志
 *.log
+
+# 训练输出
+runs/
+
+# 二进制文件
+*.exe
+
+# 大文件
+*.pt
